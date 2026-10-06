@@ -1,0 +1,312 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>アヤの事例 ジグソーカード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap">
+<style>
+/* Layout: 1カラムの教室用ツール。上=操作、中央=読むカード、下=読んだ記録と教員用 */
+:root{
+  --bg:#f5f9fd;
+  --surface:#ffffff;
+  --pale:#e3eef8;
+  --line:#c9dbec;
+  --ink:#1d2b3a;
+  --muted:#5a6d80;
+  --accent:#2f6fa8;
+  --accent-ink:#ffffff;
+  --warn:#b4541a;
+  --font:"BIZ UDPGothic","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121a23;--surface:#1a2531;--pale:#223244;--line:#30455c;
+    --ink:#e6eef6;--muted:#9fb2c5;--accent:#7fb6e6;--accent-ink:#0f1a25;--warn:#f0a070;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121a23;--surface:#1a2531;--pale:#223244;--line:#30455c;
+  --ink:#e6eef6;--muted:#9fb2c5;--accent:#7fb6e6;--accent-ink:#0f1a25;--warn:#f0a070;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.7}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px}
+h1{font-size:1.6rem;margin:0;text-wrap:balance;letter-spacing:.02em}
+.sub{color:var(--muted);font-size:.95rem;margin:0}
+
+/* 操作パネル */
+.controls{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:14px}
+.opts{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
+.opt{display:flex;align-items:center;gap:8px;font-size:.95rem}
+.opt select{font:inherit;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.opt input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 16px}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700;font-size:1.15rem;padding:12px 28px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.pool{color:var(--muted);font-size:.9rem;font-variant-numeric:tabular-nums}
+
+/* タイマー */
+.timer{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.round{font-weight:700;background:var(--pale);border-radius:999px;padding:4px 14px;font-size:.95rem}
+.clock{font-size:2.4rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.04em;min-width:5ch}
+.clock.done{color:var(--warn)}
+.bar{flex:1 1 200px;height:10px;background:var(--pale);border-radius:999px;overflow:hidden}
+.bar span{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left;transition:transform .9s linear}
+
+/* カード */
+.cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-width:0;position:relative}
+.card .no{display:inline-block;font-weight:700;color:var(--accent);font-size:.95rem;margin-bottom:6px;font-variant-numeric:tabular-nums}
+.card p{margin:0;font-size:clamp(1.1rem,1rem + .6vw,1.45rem);line-height:1.85}
+.cards.hidden-text .card p{filter:blur(9px);user-select:none}
+.cover{display:none;text-align:center;background:var(--pale);border-radius:12px;padding:18px;font-weight:700;font-size:1.2rem}
+.cover small{display:block;font-weight:400;font-size:.95rem;color:var(--muted);margin-top:4px}
+.cards.hidden-text + .cover{display:block}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:28px 20px;color:var(--muted);text-align:center}
+.empty strong{color:var(--ink)}
+
+/* 記録 */
+.log{display:grid;gap:8px}
+.log h2,.teacher summary{font-size:1rem;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.85rem;background:var(--pale);border-radius:999px;padding:2px 10px;font-variant-numeric:tabular-nums}
+.chip.r{background:transparent;color:var(--muted);padding-inline:2px}
+
+/* 教員用 */
+.teacher{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.teacher summary{cursor:pointer;font-weight:700}
+.teacher .body{display:grid;gap:14px;margin-top:12px}
+.sec h3{font-size:.95rem;margin:0 0 6px;color:var(--accent)}
+.full{display:grid;gap:6px}
+.row{display:grid;grid-template-columns:3.2em 1fr;gap:8px;padding:6px 8px;border-radius:8px}
+.row.seen{background:var(--pale)}
+.row .n{font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.note{font-size:.88rem;color:var(--muted);margin:0}
+@media (prefers-reduced-motion: reduce){.bar span{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>アヤの事例 ジグソーカード</h1>
+    <p class="sub">カタマリを引いて読み、時間が来たらグループで情報を出し合いましょう</p>
+  </header>
+
+  <section class="controls" aria-label="設定と操作">
+    <div class="opts">
+      <label class="opt">一度に表示する数
+        <select id="count">
+          <option value="1">1つ</option><option value="2">2つ</option>
+          <option value="3" selected>3つ</option><option value="4">4つ</option><option value="5">5つ</option>
+        </select>
+      </label>
+      <label class="opt">読む時間
+        <select id="minutes">
+          <option value="1">1分</option><option value="2">2分</option>
+          <option value="3" selected>3分</option><option value="4">4分</option><option value="5">5分</option>
+        </select>
+      </label>
+      <label class="opt"><input type="checkbox" id="hideOnEnd" checked>時間切れで文章を隠す</label>
+      <label class="opt"><input type="checkbox" id="showNo" checked>番号を表示</label>
+      <label class="opt"><input type="checkbox" id="noRepeat" checked>読んだカタマリは出さない</label>
+    </div>
+    <div class="actions">
+      <button class="primary" id="draw">カタマリを引く</button>
+      <button id="peek" disabled>もう一度見る</button>
+      <span class="pool" id="pool"></span>
+    </div>
+    <div class="timer" aria-live="polite">
+      <span class="round" id="round">準備中</span>
+      <span class="clock" id="clock">3:00</span>
+      <div class="bar" aria-hidden="true"><span id="barFill"></span></div>
+    </div>
+  </section>
+
+  <main>
+    <div class="cards" id="cards"></div>
+    <div class="cover" id="cover">時間です。グループで読んだ内容を伝え合いましょう<small>メモを見せ合わず、自分のことばで説明してみてください</small></div>
+  </main>
+
+  <section class="log" aria-label="これまでに読んだカタマリ">
+    <h2>これまでに読んだカタマリ</h2>
+    <div class="chips" id="history"><span class="chip r">まだありません</span></div>
+  </section>
+
+  <details class="teacher">
+    <summary>教員用：全文（元の順番）とリセット</summary>
+    <div class="body">
+      <p class="note">事例全体を元の順番で表示します。この端末で読んだカタマリは色付きで示します。</p>
+      <div id="full"></div>
+      <div class="actions"><button id="reset">記録をリセットする</button><span class="pool" id="resetMsg"></span></div>
+    </div>
+  </details>
+</div>
+
+<script>
+const SECTIONS = ["アヤの人物像","家族の状況","以前の寝る前の様子","現在の寝る前の様子","夜中の様子と両親の工夫","両親の対応と思い"];
+const CHUNKS = [
+  [0,"アヤは4歳のおませな女の子です。人前で歌ったり踊ったりすることが大好きで、特に聴いている人がいるときはよくビデオを身振りで真似しています。両親はアヤが歌ったり、自分の得意なことを周りの人に見せたりして楽しむようにさせています。"],
+  [0,"幼稚園には友達がたくさんいて、朝の時間や遊び時間を楽しんでいます。友達の中でリーダーになることも多いです。毎日ばたばたで、居眠りする時間もありません。母親はアヤのことを愛らしくはつらつとしていて、元気いっぱいだと言います。"],
+  [1,"またアヤは頑固で、友達や両親に威張り散らすことがあります。アヤの家族は郊外に住んでいます。母親はアヤを妊娠した時に退職しました。家計はきついのですが、家族は了承しているようです。"],
+  [1,"父親は、テレビ局でコマーシャルの仕事をしており電車通勤しています。両親は二人とも毎日の日課や生活スタイルの中で順調に生活しています。家族はみんな忙しい毎日を楽しんでおり、いつもプロジェクトや活動に関わっています。"],
+  [1,"父親は仕事に時間を費やし、帰宅はいつも午後8時頃です。ちょうど6カ月前に女の子のエミが生まれました。アヤは妹ができたことを喜んでいるようでした。しかし、あまりエミに関心を払っていないようです。"],
+  [2,"最近までアヤは寝ることに特に問題はありませんでした。毎晩大体午後7時30分頃にお風呂に入りパジャマに着替え、歯磨きをします。母親がアヤを寝かしつけ、両親のどちらかが添い寝をして読み聞かせをします。"],
+  [2,"それから明かりを消して、テディーベアを渡して、背中をさすり、部屋を出ます。アヤはたいていぐっすり寝て、病気の時にだけ繰り返し起きたり突然の物音で起きたりするくらいです。朝には元気よく目覚め、その日の準備は万端です。"],
+  [3,"現在アヤは寝ることを嫌がります。問題はお風呂の時間から始まり、服を脱いで家中を走り回り始めます。母親はアヤに冗談を言い、お風呂に入るようなだめますが最後には怒ってお風呂に入れなければなりません。"],
+  [3,"アヤはすぐにお風呂から出てしまい、パジャマに着替えます。アヤが3冊の本の中から1冊選び、両親の一人がその本を読み聞かせ、5分は背中をさすると（これはこれまでにやっていた日課です）、アヤは寝ることを嫌がります。"],
+  [3,"エミの世話をしているもう一人の両親はたいていこのタイミングでアヤの部屋にやってきて、おやすみを言います。両親が二人ともおやすみを言うとすすり泣いて起き上がります。両親は寝る時間であることを伝えて、部屋を出ます。"],
+  [3,"アヤは部屋の電気をつけたままにしておいてほしいと言い張ります。両親が下の階に行くと、アヤは自分の部屋から何度も両親を呼びます。その後両親がテレビを見たり新聞を読んだりしているリビングに降りてきます。"],
+  [3,"両親だけでリビングにいても、エミが一緒にいても降りてきます。母親がたいていアヤを寝室に連れ戻します。再び母親が部屋を出ると、アヤは泣き始めます。このパターンが少なくとも一日に2回以上あります。"],
+  [3,"アヤを部屋に連れ戻し、言ってきかす、物で釣る、怒鳴る、強い口調で言う、最後には叫ぶなどをやってみると、アヤは疲れ切ってたいていは自分のベッドに横になりそのまま寝ます。結局その後母親はアヤの部屋をそっと出て、自分の部屋に戻ります。"],
+  [4,"アヤは夜中に目が覚めると、母親を呼び、それから両親の寝室に行きます。この時たいていは父親がベッドに連れ戻します。アヤの部屋に鍵をかけて自分の部屋に戻るなど、父親はいろいろと試しました。"],
+  [4,"しかし、こうするとアヤは本当に手が付けられなくなってしまいます。壁を蹴り、おもちゃを壊し、ドアを叩き、2時間は泣いて起きています。また父親はアヤの寝室のドアにもう一つ扉を取り付けてみました。"],
+  [4,"しかし、父親が部屋を出ると、アヤはすぐにその扉をよじ登り、両親の部屋に駆け込んできます。両親は、取り付けた扉を登ることや、かんしゃくを起こしている時に壊した玩具や家具の角が尖った破片に頭をぶつけることで、アヤが怪我をするのではと心配しています。"],
+  [4,"両親は自分たちの寝室のドアに鍵をかけてみました。しかし、アヤはドアを30分は叩き、その後は台所の棚からバターナイフを取り出し、ドアのカギを壊して開けようとします。"],
+  [5,"アヤの夜中の行動への両親の対応は一貫していませんでした。ある時は、アヤと問題について落ち着いて話し合い、別の時にはすぐに怒鳴ります（これはたいてい両親の気分によって変わります）。"],
+  [5,"時に父親はイライラが溜まり、お尻を叩くことでアヤの問題行動が変わるのではないかと思います。両親は疲れ切り、まだ赤ちゃんのエミの世話をするだけのことによっても、アヤに我慢することがより大変に感じてしまいます。"],
+  [5,"両親はアヤの行動により、家族全体が乱れ、二人の娘との関係や夫婦関係にダメージを受けていると感じています。"]
+];
+const N = CHUNKS.length;
+const KEY = "aya-jigsaw-v1";
+const $ = id => document.getElementById(id);
+const pad2 = n => String(n).padStart(2,"0");
+
+let state = {seen:[], rounds:[], current:[]};
+try{ const s = JSON.parse(localStorage.getItem(KEY)||"null"); if(s && Array.isArray(s.seen)) state = Object.assign(state,s); }catch(e){}
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} };
+
+let timerId = null, endAt = 0, total = 0, wakeLock = null;
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function pick(k){
+  const all = [...Array(N).keys()];
+  if(!$("noRepeat").checked) return shuffle(all).slice(0,k);
+  let rest = all.filter(i=>!state.seen.includes(i));
+  let chosen = shuffle(rest).slice(0,k);
+  if(chosen.length < k){ // 残りが足りないときは読んだものから補う
+    const extra = shuffle(all.filter(i=>!chosen.includes(i) && state.seen.includes(i))).slice(0,k-chosen.length);
+    chosen = chosen.concat(extra);
+  }
+  return chosen.sort((a,b)=>a-b);
+}
+
+function renderCards(){
+  const box = $("cards");
+  box.innerHTML = "";
+  if(!state.current.length){
+    box.innerHTML = '<div class="empty"><strong>「カタマリを引く」を押すと、事例の一部がランダムに表示されます。</strong><br>全部で'+N+'個のカタマリがあります。読む時間が終わったら、グループで内容を伝え合います。</div>';
+    return;
+  }
+  state.current.forEach(i=>{
+    const c = document.createElement("article");
+    c.className = "card";
+    const no = $("showNo").checked ? '<span class="no">No. '+pad2(i+1)+' / '+N+'</span>' : "";
+    c.innerHTML = no + "<p></p>";
+    c.querySelector("p").textContent = CHUNKS[i][1];
+    box.appendChild(c);
+  });
+}
+
+function renderHistory(){
+  const h = $("history");
+  if(!state.rounds.length){ h.innerHTML = '<span class="chip r">まだありません</span>'; }
+  else{
+    h.innerHTML = "";
+    state.rounds.forEach((r,ri)=>{
+      const lab = document.createElement("span"); lab.className="chip r"; lab.textContent = (ri+1)+"回目:"; h.appendChild(lab);
+      r.forEach(i=>{ const s=document.createElement("span"); s.className="chip"; s.textContent="No."+pad2(i+1); h.appendChild(s); });
+    });
+  }
+  const left = N - state.seen.length;
+  $("pool").textContent = "読んだ数 " + state.seen.length + " / " + N + (left>0 ? "（未読 "+left+"）" : "（すべて読みました）");
+  $("round").textContent = state.rounds.length ? "ラウンド " + state.rounds.length : "準備中";
+}
+
+function renderFull(){
+  const f = $("full"); f.innerHTML = "";
+  SECTIONS.forEach((name,si)=>{
+    const sec = document.createElement("div"); sec.className="sec";
+    sec.innerHTML = "<h3></h3><div class='full'></div>";
+    sec.querySelector("h3").textContent = name;
+    const list = sec.querySelector(".full");
+    CHUNKS.forEach((c,i)=>{
+      if(c[0]!==si) return;
+      const r = document.createElement("div"); r.className = "row" + (state.seen.includes(i) ? " seen" : "");
+      r.innerHTML = '<span class="n">No.'+pad2(i+1)+'</span><span></span>';
+      r.lastChild.textContent = c[1];
+      list.appendChild(r);
+    });
+    f.appendChild(sec);
+  });
+}
+
+function setClock(ms){
+  const s = Math.max(0, Math.ceil(ms/1000));
+  $("clock").textContent = Math.floor(s/60) + ":" + pad2(s%60);
+  $("barFill").style.transform = "scaleX(" + (total ? Math.max(0,ms)/total : 1) + ")";
+}
+
+async function lockScreen(){ try{ if(navigator.wakeLock) wakeLock = await navigator.wakeLock.request("screen"); }catch(e){} }
+function releaseScreen(){ try{ wakeLock && wakeLock.release(); }catch(e){} wakeLock = null; }
+
+function tick(){
+  const left = endAt - Date.now();
+  setClock(left);
+  if(left <= 0){
+    clearInterval(timerId); timerId = null;
+    $("clock").classList.add("done");
+    if($("hideOnEnd").checked){ $("cards").classList.add("hidden-text"); $("peek").disabled = false; }
+    releaseScreen();
+  }
+}
+
+function startTimer(){
+  clearInterval(timerId);
+  total = Number($("minutes").value) * 60000;
+  endAt = Date.now() + total;
+  $("clock").classList.remove("done");
+  setClock(total);
+  timerId = setInterval(tick, 250);
+  lockScreen();
+}
+
+$("draw").addEventListener("click", ()=>{
+  const chosen = pick(Number($("count").value));
+  state.current = chosen;
+  state.rounds.push(chosen);
+  chosen.forEach(i=>{ if(!state.seen.includes(i)) state.seen.push(i); });
+  save();
+  $("cards").classList.remove("hidden-text");
+  $("peek").disabled = true;
+  renderCards(); renderHistory(); renderFull();
+  startTimer();
+});
+
+$("peek").addEventListener("click", ()=>{
+  $("cards").classList.toggle("hidden-text");
+  $("peek").textContent = $("cards").classList.contains("hidden-text") ? "もう一度見る" : "隠す";
+});
+
+let resetArmed = false;
+$("reset").addEventListener("click", ()=>{
+  if(!resetArmed){ resetArmed = true; $("reset").textContent = "本当にリセットする"; $("resetMsg").textContent = "もう一度押すと、この端末の記録が消えます"; return; }
+  resetArmed = false; $("reset").textContent = "記録をリセットする"; $("resetMsg").textContent = "リセットしました";
+  clearInterval(timerId); timerId = null; releaseScreen();
+  state = {seen:[], rounds:[], current:[]}; save();
+  total = 0; $("clock").classList.remove("done"); $("cards").classList.remove("hidden-text"); $("peek").disabled = true;
+  $("clock").textContent = $("minutes").value + ":00"; $("barFill").style.transform = "scaleX(1)";
+  renderCards(); renderHistory(); renderFull();
+});
+
+$("showNo").addEventListener("change", renderCards);
+$("minutes").addEventListener("change", ()=>{ if(!timerId){ $("clock").textContent = $("minutes").value + ":00"; } });
+
+renderCards(); renderHistory(); renderFull();
+if(state.current.length){ $("cards").classList.add("hidden-text"); $("peek").disabled = false; }
+</script>
+
+</body></html>
